@@ -4,6 +4,7 @@ import { fetchUsers, updateUser } from '../../services/api';
 import { User } from '../../types/user';
 import { debounce } from 'lodash';
 import { ToastProvider, useToast } from '../../components/ToastProvider';
+import { useConfirm } from '../../components/ConfirmDialog';
 import { useQueryState } from '../../routes/useQueryState';
 
 const UserManagementContent: React.FC = () => {
@@ -16,6 +17,7 @@ const UserManagementContent: React.FC = () => {
 
   const queryClient = useQueryClient();
   const toast = useToast();
+  const confirm = useConfirm();
 
   const debouncedSetKeyword = useMemo(
     () => debounce((value: string) => {
@@ -60,12 +62,51 @@ const UserManagementContent: React.FC = () => {
     },
   });
 
-  const handleRoleChange = (id: string, role: 'user' | 'admin') => {
-    updateUserMutation.mutate({ id, role });
+  const handleRoleChange = async (id: string, role: 'user' | 'admin') => {
+    const user = data?.data.find(u => u.id === id);
+    if (!user || user.role === role) return;
+    
+    const confirmed = await confirm.open({
+      title: '역할 변경',
+      message: `${user.email} 사용자의 역할을 ${role}(으)로 변경할까요?`,
+      confirmText: '변경',
+      cancelText: '취소'
+    });
+    
+    if (!confirmed) return;
+    
+    toast.push({ type: 'info', message: '역할 변경 중…' });
+    try {
+      await updateUserMutation.mutateAsync({ id, role });
+      toast.push({ type: 'success', message: '역할이 변경되었습니다.' });
+    } catch (error) {
+      toast.push({ type: 'error', message: '역할 변경에 실패했습니다.' });
+    }
   };
 
-  const handleStatusChange = (id: string, status: 'active' | 'locked') => {
-    updateUserMutation.mutate({ id, status });
+  const handleStatusChange = async (id: string, status: 'active' | 'locked') => {
+    const user = data?.data.find(u => u.id === id);
+    if (!user || user.status === status) return;
+    
+    const actionText = status === 'locked' ? '잠금' : '해제';
+    const statusText = status === 'locked' ? '잠긴' : '활성';
+    
+    const confirmed = await confirm.open({
+      title: `계정 ${actionText}`,
+      message: `${user.email} 계정을 ${statusText} 상태로 변경할까요?`,
+      confirmText: actionText,
+      cancelText: '취소'
+    });
+    
+    if (!confirmed) return;
+    
+    toast.push({ type: 'info', message: '계정 상태 변경 중…' });
+    try {
+      await updateUserMutation.mutateAsync({ id, status });
+      toast.push({ type: 'success', message: '계정 상태가 변경되었습니다.' });
+    } catch (error) {
+      toast.push({ type: 'error', message: '계정 상태 변경에 실패했습니다.' });
+    }
   };
 
   const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +165,7 @@ const UserManagementContent: React.FC = () => {
                 <td className="py-2 px-4 border-b">{user.email}</td>
                 <td className="py-2 px-4 border-b">
                   <select
+                    data-testid={`role-select-${user.id}`}
                     value={user.role}
                     onChange={(e) => handleRoleChange(user.id, e.target.value as 'user' | 'admin')}
                     className="border p-1 rounded"
@@ -140,6 +182,7 @@ const UserManagementContent: React.FC = () => {
                 <td className="py-2 px-4 border-b">{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td className="py-2 px-4 border-b">
                   <button
+                    data-testid={`lock-btn-${user.id}`}
                     onClick={() => handleStatusChange(user.id, user.status === 'active' ? 'locked' : 'active')}
                     className={`px-3 py-1 rounded text-white ${user.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
                   >

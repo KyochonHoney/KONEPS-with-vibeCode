@@ -27,6 +27,9 @@ function App() {
         </Route>
       </Route>
 
+      {/* Default redirect to login */}
+      <Route path="/" element={<LoginPage />} />
+      
       {/* Catch-all for undefined routes */}
       <Route path="*" element={<div>404 Not Found</div>} />
     </Routes>

@@ -1,12 +1,14 @@
 # DB (MySQL) 설계 및 구축 체크리스트
 
 ## ✅ 구현 단계별 To-Do 리스트
-- [ ] **[Design]** 테이블 스키마 설계
+- [x] **[Design]** 테이블 스키마 설계
   - `announcements` (공고 정보)
   - `files` (첨부파일 정보)
   - `analysis_results` (분석 결과)
   - `proposal_drafts` (제안서 초안)
-- [ ] **[Setup]** MySQL 서버 설치 또는 클라우드 DB 인스턴스 생성
+  - `users` (사용자 정보)
+  - `user_activity_logs` (사용자 활동 로그)
+- [x] **[Setup]** MySQL 서버 설치 또는 클라우드 DB 인스턴스 생성
 - [ ] **[Setup]** 프로젝트용 데이터베이스 및 사용자 계정 생성
 - [ ] **[Connection]** Backend와 DB 연동 설정 (Connection Pool 포함)
 - [ ] **[ORM]** ORM(e.g., Sequelize, TypeORM) 또는 쿼리 빌더(e.g., Knex.js) 설정
@@ -18,7 +20,15 @@
 ## 🔄 진행 상태
 *진행 상황, 발생한 이슈, 의사결정 사항 등을 자유롭게 기록합니다.*
 
--
+### 2025-08-27
+- ✅ **1단계 완료**: 테이블 스키마 설계
+  - 나라장터 공고 분석 시스템에 맞는 테이블 구조 설계
+  - 공고 정보, 첨부파일, 분석 결과, 제안서 초안 등 핵심 테이블 포함
+  - `db/schema.sql` 파일로 저장
+- ✅ **2단계 완료**: MySQL 서버 설치 및 설정
+  - MySQL 8.0.35 설치 완료
+  - 기존 데이터 디렉토리 확인 (이미 초기화됨)
+  - 설정 파일 `my.cnf` 업데이트
 
 ---
 

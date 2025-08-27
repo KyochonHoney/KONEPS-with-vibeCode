@@ -62,4 +62,23 @@ api.interceptors.response.use(
   }
 );
 
+// User management API functions
+export const fetchUsers = async (params: {
+  keyword?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}) => {
+  const response = await api.get('/admin/users', { params });
+  return response.data;
+};
+
+export const updateUser = async (id: string, data: {
+  role?: 'user' | 'superadmin';
+  status?: 'active' | 'locked';
+}) => {
+  const response = await api.patch(`/admin/users/${id}`, data);
+  return response.data;
+};
+
 export default api;

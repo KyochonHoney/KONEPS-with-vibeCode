@@ -3,7 +3,25 @@
     "allow": [
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(npm run dev:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(mv:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm i:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run test:*)",
+      "Bash(timeout 30 npm run test)",
+      "Bash(npx vite:*)",
+      "Bash(npm run e2e:*)",
+      "Bash(choco install:*)",
+      "Bash(where mysql)",
+      "Bash(./mysqld:*)",
+      "Bash(./mysql-8.0.35-winx64/bin/mysqld:*)",
+      "Bash(mysql-8.0.35-winx64binmysql.exe:*)",
+      "Bash(./mysql-8.0.35-winx64/bin/mysql.exe:*)",
+      "Bash(.mysqld.exe --initialize-insecure --console --datadir=\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-data\")",
+      "Bash(\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-8.0.35-winx64\\bin\\mysqld.exe\" --basedir=\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-8.0.35-winx64\" --datadir=\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-data\" --port=3306 --console)",
+      "Bash(C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/bin/mysqld.exe --basedir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64 --datadir=C:/Users/tideflo/Desktop/나라장터/db/mysql-data --port=3306 --lc-messages-dir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/share --console)"
     ],
     "deny": [],
     "ask": []
