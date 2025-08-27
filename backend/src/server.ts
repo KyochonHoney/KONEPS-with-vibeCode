@@ -1,13 +1,16 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import { testConnection } from './config/database';
+import { initializeDatabase } from './config/typeorm';
 
 // 라우트 임포트
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
+import announcementRoutes from './routes/announcements';
 
 // 환경 변수 로드
 dotenv.config();
@@ -33,8 +36,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // API 라우트 설정
-app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 // 헬스체크 엔드포인트
 app.get('/healthz', async (req, res) => {
@@ -76,10 +80,9 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/healthz',
-      auth: '/auth/*',
-      admin: '/admin/*',
-      bids: '/bids/*',
-      users: '/users/*',
+      auth: '/api/auth/*',
+      admin: '/api/admin/*',
+      announcements: '/api/announcements/*',
     },
   });
 });
@@ -131,10 +134,17 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
 // 서버 시작
 async function startServer() {
   try {
-    // 데이터베이스 연결 확인
+    // 기존 MySQL2 연결 확인
     const dbConnected = await testConnection();
     if (!dbConnected) {
       console.error('❌ Failed to connect to database. Exiting...');
+      process.exit(1);
+    }
+
+    // TypeORM 초기화
+    const typeOrmConnected = await initializeDatabase();
+    if (!typeOrmConnected) {
+      console.error('❌ Failed to initialize TypeORM. Exiting...');
       process.exit(1);
     }
 

@@ -21,7 +21,20 @@
       "Bash(./mysql-8.0.35-winx64/bin/mysql.exe:*)",
       "Bash(.mysqld.exe --initialize-insecure --console --datadir=\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-data\")",
       "Bash(\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-8.0.35-winx64\\bin\\mysqld.exe\" --basedir=\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-8.0.35-winx64\" --datadir=\"C:\\Users\\tideflo\\Desktop\\나라장터\\db\\mysql-data\" --port=3306 --console)",
-      "Bash(C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/bin/mysqld.exe --basedir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64 --datadir=C:/Users/tideflo/Desktop/나라장터/db/mysql-data --port=3306 --lc-messages-dir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/share --console)"
+      "Bash(C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/bin/mysqld.exe --basedir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64 --datadir=C:/Users/tideflo/Desktop/나라장터/db/mysql-data --port=3306 --lc-messages-dir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/share --console)",
+      "Bash(C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/bin/mysqld.exe --basedir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64 --datadir=C:/Users/tideflo/Desktop/나라장터/db/mysql-data --port=3306 --skip-grant-tables --console)",
+      "Bash(./mysql.exe -u root -P 3306 -h localhost)",
+      "Bash(net stop:*)",
+      "Bash(./start-mysql.bat)",
+      "Bash(mysqld.exe:*)",
+      "Bash(./db/start-mysql.bat)",
+      "Bash(C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/bin/mysqld.exe --basedir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64 --datadir=C:/Users/tideflo/Desktop/나라장터/db/mysql-data --port=3307 --lc-messages-dir=C:/Users/tideflo/Desktop/나라장터/db/mysql-8.0.35-winx64/share --console)",
+      "Bash(mysql:*)",
+      "Bash(npm run migration:generate:*)",
+      "Bash(npm run migration:create:*)",
+      "Bash(npm run migration:run:*)",
+      "Bash(npm run migration:show:*)",
+      "Bash(npm run seed:sample:*)"
     ],
     "deny": [],
     "ask": []
