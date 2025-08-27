@@ -13,7 +13,7 @@
 - [x] **[Connection]** Backend와 DB 연동 설정 (Connection Pool 포함)  
 - [x] **[ORM]** ORM(e.g., Sequelize, TypeORM) 또는 쿼리 빌더(e.g., Knex.js) 설정
 - [x] **[Migration]** 스키마 변경 관리를 위한 마이그레이션 시스템 구축
-- [ ] **[CRUD]** 각 테이블에 대한 데이터 저장, 조회, 수정, 삭제 로직(Repository/DAO) 구현
+- [x] **[CRUD]** 각 테이블에 대한 데이터 저장, 조회, 수정, 삭제 로직(Repository/DAO) 구현
 
 ---
 
@@ -52,6 +52,13 @@
   - 새로운 테이블 생성 마이그레이션 (CreateNewTables) 작성 및 실행 완료
   - 샘플 데이터 시더 스크립트 작성 및 실행 완료
   - API 테스트로 전체 데이터 플로우 검증 완료
+- ✅ **7단계 완료**: CRUD 로직 구현 (Repository/DAO 패턴)
+  - 모든 엔티티에 대한 Repository 클래스 구현 완료
+  - AnnouncementFileRepository, AnalysisResultRepository, ProposalDraftRepository, UserActivityLogRepository
+  - 완전한 CRUD 서비스 레이어 (FileService, AnalysisService) 구현
+  - 전체 REST API 엔드포인트 구현 (/api/files/*, /api/analysis/*)
+  - 페이지네이션, 필터링, 통계, 검색 기능 포함
+  - 고급 기능: 복잡도/실현가능성 분석, 추천 공고, 파일 상태 관리
 
 ---
 

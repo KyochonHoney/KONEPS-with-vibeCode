@@ -11,6 +11,8 @@ import { initializeDatabase } from './config/typeorm';
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import announcementRoutes from './routes/announcements';
+import filesRoutes from './routes/files';
+import analysisRoutes from './routes/analysis';
 
 // 환경 변수 로드
 dotenv.config();
@@ -39,6 +41,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/files', filesRoutes);
+app.use('/api/analysis', analysisRoutes);
 
 // 헬스체크 엔드포인트
 app.get('/healthz', async (req, res) => {
@@ -83,6 +87,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth/*',
       admin: '/api/admin/*',
       announcements: '/api/announcements/*',
+      files: '/api/files/*',
+      analysis: '/api/analysis/*',
     },
   });
 });
