@@ -1,136 +1,190 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useUsers } from '../../hooks/useUsers';
-import type { User } from '../../types/user';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchUsers, updateUser } from '../../services/api';
+import { User } from '../../types/user';
+import { debounce } from 'lodash';
+import { ToastProvider, useToast } from '../../components/ToastProvider';
+import { useQueryState } from '../../routes/useQueryState';
 
-export default function UserManagementPage() {
-  const [keyword, setKeyword] = useState('');
-  const [page, setPage] = useState(1);
-  const [size, setSize] = useState(10);
-  const [sort, setSort] = useState('createdAt:desc');
+const UserManagementContent: React.FC = () => {
+  const [keyword, setKeyword] = useQueryState('keyword', '');
+  const [page, setPage] = useQueryState('page', 1, (val) => val ? parseInt(val, 10) : 1);
+  const [size, setSize] = useQueryState('size', 10, (val) => val ? parseInt(val, 10) : 10);
+  const [sort, setSort] = useQueryState('sort', 'createdAt:desc');
+  
+  const [localKeyword, setLocalKeyword] = useState(keyword);
 
-  const params = useMemo(() => ({ keyword, page, size, sort }), [keyword, page, size, sort]);
-  const { users, pageInfo, isLoading, error, refetch, mutateRole, mutateStatus } = useUsers(params);
+  const queryClient = useQueryClient();
+  const toast = useToast();
 
-  useEffect(() => {
-    // 검색어 변경 시 첫 페이지로
-    setPage(1);
-  }, [keyword]);
+  const debouncedSetKeyword = useMemo(
+    () => debounce((value: string) => {
+      setKeyword(value);
+      setPage(1);
+    }, 300),
+    [setKeyword, setPage]
+  );
 
-  const onChangeRole = (u: User, next: User['role']) => {
-    if (u.role === next) return;
-    mutateRole.mutate({ userId: u.id, nextRole: next });
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['adminUsers', { keyword, page, size, sort }],
+    queryFn: () => fetchUsers({ keyword, page, size, sort }),
+    placeholderData: (previousData) => previousData,
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: updateUser,
+    onMutate: async (updatedUser: Partial<User> & { id: string }) => {
+      await queryClient.cancelQueries({ queryKey: ['adminUsers'] });
+      const previousUsers = queryClient.getQueryData<any>(['adminUsers', { keyword, page, size, sort }]);
+      
+      if (previousUsers) {
+        const newUsersData = previousUsers.data.map((user: User) =>
+          user.id === updatedUser.id ? { ...user, ...updatedUser } : user
+        );
+        queryClient.setQueryData(['adminUsers', { keyword, page, size, sort }], { ...previousUsers, data: newUsersData });
+      }
+      
+      return { previousUsers };
+    },
+    onError: (err, updatedUser, context) => {
+      if (context?.previousUsers) {
+        queryClient.setQueryData(['adminUsers', { keyword, page, size, sort }], context.previousUsers);
+      }
+      toast.addToast(`사용자 정보 변경 실패: ${err.message}`, 'error');
+    },
+    onSuccess: () => {
+      toast.addToast('사용자 정보가 성공적으로 변경되었습니다.', 'success');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminUsers', { keyword, page, size, sort }] });
+    },
+  });
+
+  const handleRoleChange = (id: string, role: 'user' | 'admin') => {
+    updateUserMutation.mutate({ id, role });
   };
 
-  const onToggleLock = (u: User) => {
-    const next = u.status === 'active' ? 'locked' : 'active';
-    mutateStatus.mutate({ userId: u.id, nextStatus: next });
+  const handleStatusChange = (id: string, status: 'active' | 'locked') => {
+    updateUserMutation.mutate({ id, status });
   };
+
+  const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalKeyword(e.target.value);
+    debouncedSetKeyword(e.target.value);
+  };
+
+  const handleSortChange = (column: string) => {
+    const [currentSortCol, currentSortDir] = sort.split(':');
+    let newSortDir = 'asc';
+    if (currentSortCol === column && currentSortDir === 'asc') {
+      newSortDir = 'desc';
+    }
+    setSort(`${column}:${newSortDir}`);
+  };
+
+  const renderSortIndicator = (column: string) => {
+    const [currentSortCol, currentSortDir] = sort.split(':');
+    if (currentSortCol === column) {
+      return currentSortDir === 'asc' ? ' ▲' : ' ▼';
+    }
+    return '';
+  };
+
+  if (isLoading) return <div className="text-center p-4">로딩 중...</div>;
+  if (isError) return <div className="text-center p-4 text-red-500">오류 발생: {error.message}</div>;
 
   return (
-    <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="mb-0">사용자 관리</h2>
-        <div className="d-flex gap-2">
-          <input
-            className="form-control"
-            placeholder="검색(이메일)"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            style={{ width: 240 }}
-          />
-          <select className="form-select" value={sort} onChange={(e) => setSort(e.target.value)} style={{ width: 200 }}>
-            <option value="createdAt:desc">최신 가입순</option>
-            <option value="createdAt:asc">오래된 가입순</option>
-            <option value="email:asc">이메일 A→Z</option>
-            <option value="email:desc">이메일 Z→A</option>
-          </select>
-          <button className="btn btn-outline-secondary" onClick={() => refetch()}>새로고침</button>
-        </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">사용자 관리</h1>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={localKeyword}
+          onChange={handleKeywordChange}
+          placeholder="이메일 또는 이름으로 검색"
+          className="border p-2 rounded w-full md:w-1/3"
+        />
       </div>
-
-      {isLoading && <div className="phx-skeleton">불러오는 중…</div>}
-      {error && <div className="alert alert-danger">목록 조회 실패: {(error as any)?.message ?? 'Error'}</div>}
-
-      {!isLoading && !error && (
-        <div className="table-responsive">
-          <table className="table align-middle">
-            <thead>
-              <tr>
-                <th style={{ width: 140 }}>ID</th>
-                <th>이메일</th>
-                <th style={{ width: 140 }}>역할</th>
-                <th style={{ width: 120 }}>상태</th>
-                <th style={{ width: 160 }}>가입일</th>
-                <th style={{ width: 180 }}>작업</th>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSortChange('id')}>ID{renderSortIndicator('id')}</th>
+              <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSortChange('email')}>이메일{renderSortIndicator('email')}</th>
+              <th className="py-2 px-4 border-b">역할</th>
+              <th className="py-2 px-4 border-b">상태</th>
+              <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSortChange('createdAt')}>가입일{renderSortIndicator('createdAt')}</th>
+              <th className="py-2 px-4 border-b">작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.data.map((user: User) => (
+              <tr key={user.id}>
+                <td className="py-2 px-4 border-b">{user.id}</td>
+                <td className="py-2 px-4 border-b">{user.email}</td>
+                <td className="py-2 px-4 border-b">
+                  <select
+                    value={user.role}
+                    onChange={(e) => handleRoleChange(user.id, e.target.value as 'user' | 'admin')}
+                    className="border p-1 rounded"
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </td>
+                <td className="py-2 px-4 border-b">
+                  <span className={`px-2 py-1 rounded-full text-sm ${user.status === 'active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                    {user.status}
+                  </span>
+                </td>
+                <td className="py-2 px-4 border-b">{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td className="py-2 px-4 border-b">
+                  <button
+                    onClick={() => handleStatusChange(user.id, user.status === 'active' ? 'locked' : 'active')}
+                    className={`px-3 py-1 rounded text-white ${user.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                  >
+                    {user.status === 'active' ? '잠금' : '활성'}
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td><code>{u.id}</code></td>
-                  <td>{u.email}</td>
-                  <td>
-                    <select
-                      className="form-select form-select-sm"
-                      value={u.role}
-                      onChange={(e) => onChangeRole(u, e.target.value as User['role'])}
-                      disabled={mutateRole.isPending}
-                    >
-                      <option value="user">user</option>
-                      <option value="superadmin">superadmin</option>
-                    </select>
-                  </td>
-                  <td>
-                    <span className={`badge ${u.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
-                      {u.status}
-                    </span>
-                  </td>
-                  <td>{new Date(u.createdAt).toLocaleString()}</td>
-                  <td className="d-flex gap-2">
-                    <button
-                      className={`btn btn-sm ${u.status === 'active' ? 'btn-outline-danger' : 'btn-outline-success'}`}
-                      onClick={() => onToggleLock(u)}
-                      disabled={mutateStatus.isPending}
-                    >
-                      {u.status === 'active' ? '잠금' : '해제'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {users.length === 0 && (
-                <tr><td colSpan={6} className="text-center text-muted py-4">사용자가 없습니다.</td></tr>
-              )}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-between items-center mt-4">
+        <div>
+          <select value={size} onChange={(e) => setSize(Number(e.target.value))} className="border p-2 rounded">
+            <option value={10}>10개씩</option>
+            <option value={20}>20개씩</option>
+            <option value={50}>50개씩</option>
+          </select>
         </div>
-      )}
-
-      {/* pagination */}
-      {pageInfo && pageInfo.total > 0 && (
-        <div className="d-flex justify-content-center align-items-center gap-2 mt-3">
-          <button className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={() => setPage(page - 1)}>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setPage(page - 1)}
+            disabled={page <= 1}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
             이전
           </button>
-          <span>Page {page} / {Math.ceil(pageInfo.total / pageInfo.size)}</span>
+          <span>{page} / {data?.meta.totalPages ?? 1}</span>
           <button
-            className="btn btn-sm btn-outline-secondary"
-            disabled={page * pageInfo.size >= pageInfo.total}
             onClick={() => setPage(page + 1)}
+            disabled={page >= (data?.meta.totalPages ?? 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
           >
             다음
           </button>
-          <select
-            className="form-select form-select-sm ms-2"
-            value={size}
-            onChange={(e) => { setSize(Number(e.target.value)); setPage(1); }}
-            style={{ width: 100 }}
-          >
-            <option value={10}>10/페이지</option>
-            <option value={20}>20/페이지</option>
-            <option value={50}>50/페이지</option>
-          </select>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
+
+const UserManagementPage: React.FC = () => (
+  <ToastProvider>
+    <UserManagementContent />
+  </ToastProvider>
+);
+
+export default UserManagementPage;
