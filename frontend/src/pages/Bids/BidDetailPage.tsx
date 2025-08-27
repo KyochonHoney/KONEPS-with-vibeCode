@@ -1,10 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import { useBidDetail } from '../../hooks/useBidDetail';
 
 const BidDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { bidDetail, isLoading, error, toggleStar } = useBidDetail();
+
+  const [isConverting, setIsConverting] = useState<{ [key: number]: boolean }>({});
+  const [conversionError, setConversionError] = useState<{ [key: number]: string | null }>({});
+
+  const handleHwpDownload = async (fileId: number, originalFilename: string) => {
+    setIsConverting(prev => ({ ...prev, [fileId]: true }));
+    setConversionError(prev => ({ ...prev, [fileId]: null }));
+
+    try {
+      const response = await axios.post(`/api/files/${fileId}/convert-hwp`);
+      const { convertedFilePath } = response.data;
+
+      if (convertedFilePath) {
+        const filename = convertedFilePath.split(/[\/]/).pop(); // Extract filename from path
+        if (filename) {
+          window.open(`/api/files/converted/${filename}`, '_blank');
+        } else {
+          throw new Error('Converted filename not found.');
+        }
+      } else {
+        throw new Error('Converted file path not returned.');
+      }
+    } catch (err: any) {
+      console.error('HWP conversion failed:', err);
+      setConversionError(prev => ({ ...prev, [fileId]: err.response?.data?.message || err.message || 'Unknown error' }));
+    } finally {
+      setIsConverting(prev => ({ ...prev, [fileId]: false }));
+    }
+  };
 
   if (isLoading) return <div>Loading bid details...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -66,9 +96,16 @@ const BidDetailPage: React.FC = () => {
                 </span>
                 <button
                   onClick={() => window.open(file.url, '_blank')}
-                  style={{ marginLeft: '10px', padding: '5px 10px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  style={{ marginLeft: '10px', padding: '5px 10px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
-                  다운로드
+                  원본 다운로드
+                </button>
+                <button
+                  onClick={() => handleHwpDownload(file.id, file.original_filename)}
+                  style={{ marginLeft: '10px', padding: '5px 10px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  disabled={isConverting[file.id]}
+                >
+                  {isConverting[file.id] ? '변환 중...' : 'HWP 변환 다운로드'}
                 </button>
               </li>
             ))}
