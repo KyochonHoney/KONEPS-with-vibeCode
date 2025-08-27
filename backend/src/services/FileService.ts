@@ -84,7 +84,10 @@ export class FileService {
     return this.fileRepository.getFileStats();
   }
 
-  async getFilesWithPagination(page: number, limit: number): Promise<{
+  async getFilesWithPagination(
+    page: number,
+    limit: number,
+  ): Promise<{
     files: AnnouncementFile[];
     total: number;
     totalPages: number;
@@ -104,7 +107,7 @@ export class FileService {
     // 1. file.download_url에서 파일 다운로드
     // 2. file.file_path에 저장
     // 3. 파일 해시 계산 및 검증
-    
+
     // 임시로 다운로드 완료로 표시
     await this.fileRepository.markAsDownloaded(fileId);
     return true;
@@ -120,7 +123,7 @@ export class FileService {
     // TODO: 실제 파일 분석 로직 구현
     // 1. HuggingFace 모델로 파일 분석
     // 2. 분석 결과를 analysis_results 테이블에 저장
-    
+
     // 임시로 분석 완료로 표시
     await this.fileRepository.markAsAnalyzed(fileId);
     return true;

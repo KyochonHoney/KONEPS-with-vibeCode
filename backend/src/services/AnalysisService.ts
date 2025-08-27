@@ -33,15 +33,12 @@ export class AnalysisService {
   }): Promise<AnalysisResult> {
     const data = {
       ...analysisData,
-      analysis_status: analysisData.analysis_status || 'pending'
+      analysis_status: analysisData.analysis_status || 'pending',
     };
     return this.analysisRepository.create(data);
   }
 
-  async updateAnalysisResult(
-    id: number,
-    updateData: Partial<AnalysisResult>
-  ): Promise<AnalysisResult | null> {
+  async updateAnalysisResult(id: number, updateData: Partial<AnalysisResult>): Promise<AnalysisResult | null> {
     return this.analysisRepository.update(id, updateData);
   }
 
@@ -93,7 +90,10 @@ export class AnalysisService {
     return this.analysisRepository.findRecentAnalysis(days);
   }
 
-  async getAnalysisWithPagination(page: number, limit: number): Promise<{
+  async getAnalysisWithPagination(
+    page: number,
+    limit: number,
+  ): Promise<{
     analysis_results: AnalysisResult[];
     total: number;
     totalPages: number;
@@ -112,51 +112,47 @@ export class AnalysisService {
     try {
       // 분석 상태를 처리중으로 변경
       await this.analysisRepository.update(analysisId, {
-        analysis_status: 'processing'
+        analysis_status: 'processing',
       });
 
       // TODO: 실제 AI 분석 로직 구현
       // 1. HuggingFace 모델 호출
       // 2. 공고 문서 및 첨부파일 분석
       // 3. 키워드, 기술요구사항, 복잡도 등 추출
-      
+
       // 임시 분석 결과 생성
       const mockAnalysisResult = {
         key_requirements: {
           technical: ['웹 개발 경험', 'API 연동 경험'],
           business: ['정부 용역 경험', '프로젝트 관리 경험'],
-          timeline: '3-6개월'
+          timeline: '3-6개월',
         },
         technical_specs: {
           backend: 'Node.js',
           frontend: 'React',
-          database: 'MySQL'
+          database: 'MySQL',
         },
         evaluation_criteria: {
           기술력: '40%',
           경험: '30%',
-          가격: '30%'
+          가격: '30%',
         },
         complexity_score: Math.random() * 10,
         feasibility_score: Math.random() * 10,
-        analysis_notes: '자동 분석이 완료되었습니다.'
+        analysis_notes: '자동 분석이 완료되었습니다.',
       };
 
       // 분석 완료로 업데이트
       await this.analysisRepository.update(analysisId, {
         ...mockAnalysisResult,
         analysis_status: 'completed',
-        analyzed_at: new Date()
+        analyzed_at: new Date(),
       });
 
       return true;
-
     } catch (error) {
       // 오류 발생시 실패 상태로 변경
-      await this.analysisRepository.markAsFailed(
-        analysisId, 
-        `분석 처리 중 오류 발생: ${(error as Error).message}`
-      );
+      await this.analysisRepository.markAsFailed(analysisId, `분석 처리 중 오류 발생: ${(error as Error).message}`);
       return false;
     }
   }
@@ -175,10 +171,9 @@ export class AnalysisService {
   async getRecommendedAnnouncements(): Promise<AnalysisResult[]> {
     // 실현가능성 7.0 이상, 복잡도 6.0 이하인 분석 결과
     const highFeasibility = await this.analysisRepository.findByFeasibilityRange(7.0, 10.0);
-    
-    return highFeasibility.filter(analysis => 
-      analysis.complexity_score !== null && 
-      parseFloat(analysis.complexity_score.toString()) <= 6.0
+
+    return highFeasibility.filter(
+      analysis => analysis.complexity_score !== null && parseFloat(analysis.complexity_score.toString()) <= 6.0,
     );
   }
 }

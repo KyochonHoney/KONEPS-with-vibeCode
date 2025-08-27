@@ -30,7 +30,7 @@ export const getAnalysisResultById = async (req: Request, res: Response, next: N
     if (!analysisResult) {
       return res.status(404).json({
         error: 'Analysis result not found',
-        message: `Analysis result with id ${id} does not exist`
+        message: `Analysis result with id ${id} does not exist`,
       });
     }
 
@@ -63,13 +63,13 @@ export const createAnalysisResult = async (req: Request, res: Response, next: Ne
       complexity_score,
       feasibility_score,
       analysis_status,
-      analysis_notes
+      analysis_notes,
     } = req.body;
 
     if (!announcement_id || !summary) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'announcement_id and summary are required'
+        message: 'announcement_id and summary are required',
       });
     }
 
@@ -82,7 +82,7 @@ export const createAnalysisResult = async (req: Request, res: Response, next: Ne
       complexity_score: complexity_score ? parseFloat(complexity_score) : undefined,
       feasibility_score: feasibility_score ? parseFloat(feasibility_score) : undefined,
       analysis_status,
-      analysis_notes
+      analysis_notes,
     });
 
     res.status(201).json(analysisResult);
@@ -112,7 +112,7 @@ export const updateAnalysisResult = async (req: Request, res: Response, next: Ne
     if (!analysisResult) {
       return res.status(404).json({
         error: 'Analysis result not found',
-        message: `Analysis result with id ${id} does not exist`
+        message: `Analysis result with id ${id} does not exist`,
       });
     }
 
@@ -131,7 +131,7 @@ export const deleteAnalysisResult = async (req: Request, res: Response, next: Ne
     if (!success) {
       return res.status(404).json({
         error: 'Analysis result not found',
-        message: `Analysis result with id ${id} does not exist`
+        message: `Analysis result with id ${id} does not exist`,
       });
     }
 
@@ -181,7 +181,7 @@ export const getAnalysisByComplexityRange = async (req: Request, res: Response, 
     if (minScore < 0 || maxScore > 10 || minScore > maxScore) {
       return res.status(400).json({
         error: 'Invalid score range',
-        message: 'Scores must be between 0-10 and min must be less than max'
+        message: 'Scores must be between 0-10 and min must be less than max',
       });
     }
 
@@ -201,7 +201,7 @@ export const getAnalysisByFeasibilityRange = async (req: Request, res: Response,
     if (minScore < 0 || maxScore > 10 || minScore > maxScore) {
       return res.status(400).json({
         error: 'Invalid score range',
-        message: 'Scores must be between 0-10 and min must be less than max'
+        message: 'Scores must be between 0-10 and min must be less than max',
       });
     }
 
@@ -217,13 +217,13 @@ export const markAnalysisAsCompleted = async (req: Request, res: Response, next:
   try {
     const id = parseInt(req.params.id);
     const { analysis_notes } = req.body;
-    
+
     const success = await analysisService.markAnalysisAsCompleted(id, analysis_notes);
 
     if (!success) {
       return res.status(404).json({
         error: 'Analysis result not found',
-        message: `Analysis result with id ${id} does not exist`
+        message: `Analysis result with id ${id} does not exist`,
       });
     }
 
@@ -242,7 +242,7 @@ export const markAnalysisAsFailed = async (req: Request, res: Response, next: Ne
     if (!error_message) {
       return res.status(400).json({
         error: 'Missing error message',
-        message: 'error_message is required when marking analysis as failed'
+        message: 'error_message is required when marking analysis as failed',
       });
     }
 
@@ -251,7 +251,7 @@ export const markAnalysisAsFailed = async (req: Request, res: Response, next: Ne
     if (!success) {
       return res.status(404).json({
         error: 'Analysis result not found',
-        message: `Analysis result with id ${id} does not exist`
+        message: `Analysis result with id ${id} does not exist`,
       });
     }
 
@@ -291,7 +291,7 @@ export const processAnalysis = async (req: Request, res: Response, next: NextFun
     if (!success) {
       return res.status(400).json({
         error: 'Analysis processing failed',
-        message: 'Analysis not found or not in pending status'
+        message: 'Analysis not found or not in pending status',
       });
     }
 

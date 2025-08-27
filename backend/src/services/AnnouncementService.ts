@@ -35,10 +35,7 @@ export class AnnouncementService {
     return this.announcementRepository.create(announcementData);
   }
 
-  async updateAnnouncement(
-    id: number,
-    updateData: Partial<Announcement>
-  ): Promise<Announcement | null> {
+  async updateAnnouncement(id: number, updateData: Partial<Announcement>): Promise<Announcement | null> {
     return this.announcementRepository.update(id, updateData);
   }
 
@@ -66,7 +63,10 @@ export class AnnouncementService {
     return this.announcementRepository.searchByTitle(searchTerm);
   }
 
-  async getAnnouncementsWithPagination(page: number, limit: number): Promise<{
+  async getAnnouncementsWithPagination(
+    page: number,
+    limit: number,
+  ): Promise<{
     announcements: Announcement[];
     total: number;
     totalPages: number;

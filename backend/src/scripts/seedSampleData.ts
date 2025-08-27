@@ -20,14 +20,15 @@ async function seedSampleData() {
     const sampleAnnouncement = announcementRepo.create({
       bid_number: 'TEST-2025-001',
       title: 'AI 기반 문서 분석 시스템 구축 용역',
-      description: 'TypeORM 마이그레이션 및 API 테스트를 위한 샘플 공고입니다. 실제 나라장터 공고 형식으로 작성되었습니다.',
+      description:
+        'TypeORM 마이그레이션 및 API 테스트를 위한 샘플 공고입니다. 실제 나라장터 공고 형식으로 작성되었습니다.',
       contracting_agency: '한국정보화진흥원',
       budget_amount: 500000000, // 5억원
       announcement_date: new Date('2025-08-27T09:00:00Z'),
       application_deadline: new Date('2025-09-15T18:00:00Z'),
       status: 'active',
       requirements: '- SW개발업체 (주업종코드 62010)\n- 동종업무 수행실적 보유\n- 기술인력 보유 증명서 제출',
-      original_url: 'https://www.g2b.go.kr/sample'
+      original_url: 'https://www.g2b.go.kr/sample',
     });
 
     const savedAnnouncement = await announcementRepo.save(sampleAnnouncement);
@@ -44,7 +45,7 @@ async function seedSampleData() {
       file_hash: 'abc123def456',
       download_url: 'https://www.g2b.go.kr/download/sample.pdf',
       is_downloaded: true,
-      is_analyzed: false
+      is_analyzed: false,
     });
 
     const savedFile = await fileRepo.save(sampleFile);
@@ -53,30 +54,31 @@ async function seedSampleData() {
     // 3. 샘플 분석 결과 생성
     const sampleAnalysis = analysisRepo.create({
       announcement_id: savedAnnouncement.id,
-      summary: '이 공고는 AI 기반 문서 분석 시스템 구축을 위한 용역으로, 기술적 복잡도가 높고 다양한 AI 모델 연동이 필요합니다.',
+      summary:
+        '이 공고는 AI 기반 문서 분석 시스템 구축을 위한 용역으로, 기술적 복잡도가 높고 다양한 AI 모델 연동이 필요합니다.',
       key_requirements: {
         technical: ['Python/Node.js 개발 경험', 'AI/ML 모델 활용 경험', '대용량 문서 처리'],
         business: ['정부 용역 수행 경험', '보안 요구사항 준수', '프로젝트 관리 역량'],
-        timeline: '6개월 내 완료'
+        timeline: '6개월 내 완료',
       },
       technical_specs: {
         backend: 'Node.js + TypeScript',
         frontend: 'React + TypeScript',
         database: 'MySQL 8.0',
         ai_models: ['HuggingFace Transformers', 'OpenAI GPT'],
-        deployment: 'Docker + Kubernetes'
+        deployment: 'Docker + Kubernetes',
       },
       evaluation_criteria: {
         기술력: '40%',
         경험: '30%',
         가격: '20%',
-        제안내용: '10%'
+        제안내용: '10%',
       },
       complexity_score: 8.5,
       feasibility_score: 7.2,
       analysis_status: 'completed',
       analysis_notes: '높은 기술적 요구사항을 가지고 있으나, 충분한 개발 기간과 예산이 책정되어 수행 가능성이 높음',
-      analyzed_at: new Date()
+      analyzed_at: new Date(),
     });
 
     const savedAnalysis = await analysisRepo.save(sampleAnalysis);
@@ -92,7 +94,7 @@ async function seedSampleData() {
         budget_amount: 200000000,
         announcement_date: new Date('2025-08-26T09:00:00Z'),
         application_deadline: new Date('2025-09-10T18:00:00Z'),
-        status: 'active'
+        status: 'active',
       },
       {
         bid_number: 'TEST-2025-003',
@@ -102,8 +104,8 @@ async function seedSampleData() {
         budget_amount: 800000000,
         announcement_date: new Date('2025-08-25T09:00:00Z'),
         application_deadline: new Date('2025-09-20T18:00:00Z'),
-        status: 'active'
-      }
+        status: 'active',
+      },
     ];
 
     for (const announcementData of additionalAnnouncements) {
@@ -117,7 +119,6 @@ async function seedSampleData() {
 
     await AppDataSource.destroy();
     process.exit(0);
-
   } catch (error) {
     console.error('❌ 샘플 데이터 생성 실패:', error);
     process.exit(1);

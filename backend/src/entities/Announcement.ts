@@ -1,12 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-  Index,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
 import { AnnouncementFile } from './AnnouncementFile';
 import { AnalysisResult } from './AnalysisResult';
 
@@ -48,10 +40,10 @@ export class Announcement {
   @Column({ length: 500, nullable: true })
   original_url?: string; // 원본 공고 URL
 
-  @OneToMany(() => AnnouncementFile, (file) => file.announcement)
+  @OneToMany(() => AnnouncementFile, file => file.announcement)
   files!: AnnouncementFile[];
 
-  @OneToMany(() => AnalysisResult, (analysis) => analysis.announcement)
+  @OneToMany(() => AnalysisResult, analysis => analysis.announcement)
   analysis_results!: AnalysisResult[];
 
   @CreateDateColumn()

@@ -47,7 +47,7 @@ export class AnnouncementFile {
   @Column({ type: 'boolean', default: false })
   is_analyzed!: boolean; // 분석 완료 여부
 
-  @ManyToOne(() => Announcement, (announcement) => announcement.files, {
+  @ManyToOne(() => Announcement, announcement => announcement.files, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'announcement_id' })

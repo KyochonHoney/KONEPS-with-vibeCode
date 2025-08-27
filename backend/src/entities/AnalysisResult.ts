@@ -49,13 +49,13 @@ export class AnalysisResult {
   @Column({ type: 'datetime', nullable: true })
   analyzed_at?: Date; // 분석 완료 시간
 
-  @ManyToOne(() => Announcement, (announcement) => announcement.analysis_results, {
+  @ManyToOne(() => Announcement, announcement => announcement.analysis_results, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'announcement_id' })
   announcement!: Announcement;
 
-  @OneToMany(() => ProposalDraft, (draft) => draft.analysis_result)
+  @OneToMany(() => ProposalDraft, draft => draft.analysis_result)
   proposal_drafts!: ProposalDraft[];
 
   @CreateDateColumn()

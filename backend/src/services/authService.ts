@@ -2,14 +2,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { db } from '../utils/database';
 import { JWTUtil } from '../utils/jwt';
-import { 
-  User, 
-  UserWithRole, 
-  AuthResponse, 
-  RefreshTokenRecord,
-  LoginRequest,
-  RegisterRequest 
-} from '../types/auth';
+import { UserWithRole, AuthResponse, RefreshTokenRecord, LoginRequest, RegisterRequest } from '../types/auth';
 import { RowDataPacket } from 'mysql2';
 
 export class AuthService {
@@ -37,10 +30,7 @@ export class AuthService {
     const { email, password } = registerData;
 
     // 이메일 중복 확인
-    const existingUser = await db.findOne<RowDataPacket>(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
+    const existingUser = await db.findOne<RowDataPacket>('SELECT id FROM users WHERE email = ?', [email]);
 
     if (existingUser) {
       throw new Error('Email already exists');
@@ -53,21 +43,17 @@ export class AuthService {
     const result = await db.execute(
       `INSERT INTO users (email, password_hash, role_id, status) 
        VALUES (?, ?, 2, 'active')`,
-      [email, passwordHash]
+      [email, passwordHash],
     );
 
     return {
       id: result.insertId,
-      email
+      email,
     };
   }
 
   // 로그인
-  static async login(
-    loginData: LoginRequest,
-    ipAddress?: string,
-    userAgent?: string
-  ): Promise<AuthResponse> {
+  static async login(loginData: LoginRequest, ipAddress?: string, userAgent?: string): Promise<AuthResponse> {
     const { email, password } = loginData;
 
     // 사용자 조회 (역할 정보 포함)
@@ -76,7 +62,7 @@ export class AuthService {
        FROM users u 
        LEFT JOIN roles r ON u.role_id = r.id 
        WHERE u.email = ?`,
-      [email]
+      [email],
     );
 
     if (!user) {
@@ -107,14 +93,14 @@ export class AuthService {
       `UPDATE users 
        SET failed_login_attempts = 0, locked_until = NULL, last_login_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [user.id]
+      [user.id],
     );
 
     // JWT 토큰 생성
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      role: user.role_name
+      role: user.role_name,
     };
 
     const accessToken = await JWTUtil.generateAccessToken(tokenPayload);
@@ -130,32 +116,23 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role_name
-      }
+        role: user.role_name,
+      },
     };
   }
 
   // 로그인 실패 처리
   private static async handleFailedLogin(userId: number): Promise<void> {
     // 실패 횟수 증가
-    await db.execute(
-      'UPDATE users SET failed_login_attempts = failed_login_attempts + 1 WHERE id = ?',
-      [userId]
-    );
+    await db.execute('UPDATE users SET failed_login_attempts = failed_login_attempts + 1 WHERE id = ?', [userId]);
 
     // 현재 실패 횟수 조회
-    const user = await db.findOne<RowDataPacket>(
-      'SELECT failed_login_attempts FROM users WHERE id = ?',
-      [userId]
-    );
+    const user = await db.findOne<RowDataPacket>('SELECT failed_login_attempts FROM users WHERE id = ?', [userId]);
 
     // 최대 시도 횟수 초과 시 계정 잠금
     if (user && user.failed_login_attempts >= this.MAX_LOGIN_ATTEMPTS) {
       const lockUntil = new Date(Date.now() + this.LOCKOUT_TIME);
-      await db.execute(
-        'UPDATE users SET status = ?, locked_until = ? WHERE id = ?',
-        ['locked', lockUntil, userId]
-      );
+      await db.execute('UPDATE users SET status = ?, locked_until = ? WHERE id = ?', ['locked', lockUntil, userId]);
     }
   }
 
@@ -164,29 +141,26 @@ export class AuthService {
     userId: number,
     refreshToken: string,
     ipAddress?: string,
-    userAgent?: string
+    userAgent?: string,
   ): Promise<void> {
     const tokenHash = this.hashRefreshToken(refreshToken);
     const expiresAt = JWTUtil.getTokenExpiration(process.env.JWT_REFRESH_EXPIRES_IN || '7d');
 
     // 기존 활성 토큰 비활성화 (사용자당 하나의 활성 토큰만 유지)
-    await db.execute(
-      'UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ? AND is_active = TRUE',
-      [userId]
-    );
+    await db.execute('UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ? AND is_active = TRUE', [userId]);
 
     // 새 리프레시 토큰 저장
     await db.execute(
       `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, ip_address, user_agent)
        VALUES (?, ?, ?, ?, ?)`,
-      [userId, tokenHash, expiresAt, ipAddress, userAgent]
+      [userId, tokenHash, expiresAt, ipAddress, userAgent],
     );
   }
 
   // 토큰 갱신
   static async refreshTokens(refreshToken: string): Promise<AuthResponse> {
     // 리프레시 토큰 검증
-    const payload = await JWTUtil.verifyRefreshToken(refreshToken);
+    await JWTUtil.verifyRefreshToken(refreshToken);
     const tokenHash = this.hashRefreshToken(refreshToken);
 
     // 데이터베이스에서 토큰 확인
@@ -196,7 +170,7 @@ export class AuthService {
        JOIN users u ON rt.user_id = u.id
        LEFT JOIN roles r ON u.role_id = r.id
        WHERE rt.token_hash = ? AND rt.is_active = TRUE AND rt.expires_at > CURRENT_TIMESTAMP`,
-      [tokenHash]
+      [tokenHash],
     );
 
     if (!tokenRecord) {
@@ -209,7 +183,7 @@ export class AuthService {
        FROM users u 
        LEFT JOIN roles r ON u.role_id = r.id 
        WHERE u.id = ?`,
-      [tokenRecord.user_id]
+      [tokenRecord.user_id],
     );
 
     if (!user || user.status !== 'active') {
@@ -220,24 +194,16 @@ export class AuthService {
     const newTokenPayload = {
       id: user.id,
       email: user.email,
-      role: user.role_name
+      role: user.role_name,
     };
 
     const newAccessToken = await JWTUtil.generateAccessToken(newTokenPayload);
     const newRefreshToken = await JWTUtil.generateRefreshToken(newTokenPayload);
 
     // 기존 토큰 비활성화 및 새 토큰 저장
-    await db.execute(
-      'UPDATE refresh_tokens SET is_active = FALSE WHERE token_hash = ?',
-      [tokenHash]
-    );
+    await db.execute('UPDATE refresh_tokens SET is_active = FALSE WHERE token_hash = ?', [tokenHash]);
 
-    await this.saveRefreshToken(
-      user.id, 
-      newRefreshToken, 
-      tokenRecord.ip_address, 
-      tokenRecord.user_agent
-    );
+    await this.saveRefreshToken(user.id, newRefreshToken, tokenRecord.ip_address, tokenRecord.user_agent);
 
     return {
       accessToken: newAccessToken,
@@ -246,35 +212,29 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role_name
-      }
+        role: user.role_name,
+      },
     };
   }
 
   // 로그아웃 (리프레시 토큰 무효화)
   static async logout(refreshToken: string): Promise<void> {
     const tokenHash = this.hashRefreshToken(refreshToken);
-    
-    await db.execute(
-      'UPDATE refresh_tokens SET is_active = FALSE WHERE token_hash = ?',
-      [tokenHash]
-    );
+
+    await db.execute('UPDATE refresh_tokens SET is_active = FALSE WHERE token_hash = ?', [tokenHash]);
   }
 
   // 만료된 토큰 정리 (스케줄러에서 호출)
   static async cleanupExpiredTokens(): Promise<number> {
     const result = await db.execute(
-      'DELETE FROM refresh_tokens WHERE expires_at < CURRENT_TIMESTAMP OR is_active = FALSE'
+      'DELETE FROM refresh_tokens WHERE expires_at < CURRENT_TIMESTAMP OR is_active = FALSE',
     );
-    
+
     return result.affectedRows || 0;
   }
 
   // 사용자의 모든 토큰 무효화 (보안 목적)
   static async revokeAllUserTokens(userId: number): Promise<void> {
-    await db.execute(
-      'UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ?',
-      [userId]
-    );
+    await db.execute('UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ?', [userId]);
   }
 }

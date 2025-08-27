@@ -8,9 +8,9 @@ export class AdminController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const size = Math.min(parseInt(req.query.size as string) || 10, 100); // 최대 100개
-      const keyword = req.query.keyword as string || '';
-      const sort = req.query.sort as string || 'created_at';
-      const order = req.query.order as string || 'desc';
+      const keyword = (req.query.keyword as string) || '';
+      const sort = (req.query.sort as string) || 'created_at';
+      const order = (req.query.order as string) || 'desc';
 
       const offset = (page - 1) * size;
 
@@ -47,10 +47,7 @@ export class AdminController {
         LIMIT ? OFFSET ?
       `;
 
-      const users = await db.query<RowDataPacket[]>(
-        usersQuery,
-        [...queryParams, size, offset]
-      );
+      const users = await db.query<RowDataPacket[]>(usersQuery, [...queryParams, size, offset]);
 
       // 총 개수 조회
       const countQuery = `
@@ -72,15 +69,14 @@ export class AdminController {
           total,
           totalPages,
           hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
+          hasPrev: page > 1,
+        },
       });
-
     } catch (error: any) {
       console.error('Get users error:', error);
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Failed to retrieve users'
+        message: 'Failed to retrieve users',
       });
     }
   }
@@ -93,7 +89,7 @@ export class AdminController {
       if (isNaN(userId)) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Invalid user ID'
+          message: 'Invalid user ID',
         });
         return;
       }
@@ -113,13 +109,13 @@ export class AdminController {
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
         WHERE u.id = ?`,
-        [userId]
+        [userId],
       );
 
       if (!user) {
         res.status(404).json({
           error: 'Not Found',
-          message: 'User not found'
+          message: 'User not found',
         });
         return;
       }
@@ -135,7 +131,7 @@ export class AdminController {
         LEFT JOIN user_favorites uf ON u.id = uf.user_id
         LEFT JOIN refresh_tokens rt ON u.id = rt.user_id AND rt.is_active = TRUE AND rt.expires_at > CURRENT_TIMESTAMP
         WHERE u.id = ?`,
-        [userId]
+        [userId],
       );
 
       res.json({
@@ -144,16 +140,15 @@ export class AdminController {
           statistics: stats || {
             total_bids: 0,
             total_favorites: 0,
-            active_sessions: 0
-          }
-        }
+            active_sessions: 0,
+          },
+        },
       });
-
     } catch (error: any) {
       console.error('Get user by ID error:', error);
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Failed to retrieve user'
+        message: 'Failed to retrieve user',
       });
     }
   }
@@ -167,21 +162,18 @@ export class AdminController {
       if (isNaN(userId)) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Invalid user ID'
+          message: 'Invalid user ID',
         });
         return;
       }
 
       // 사용자 존재 확인
-      const existingUser = await db.findOne<RowDataPacket>(
-        'SELECT id, email FROM users WHERE id = ?',
-        [userId]
-      );
+      const existingUser = await db.findOne<RowDataPacket>('SELECT id, email FROM users WHERE id = ?', [userId]);
 
       if (!existingUser) {
         res.status(404).json({
           error: 'Not Found',
-          message: 'User not found'
+          message: 'User not found',
         });
         return;
       }
@@ -195,21 +187,18 @@ export class AdminController {
         if (!validRoles.includes(role)) {
           res.status(400).json({
             error: 'Validation Error',
-            message: 'Invalid role. Must be one of: user, superadmin'
+            message: 'Invalid role. Must be one of: user, superadmin',
           });
           return;
         }
 
         // 역할 ID 조회
-        const roleRecord = await db.findOne<RowDataPacket>(
-          'SELECT id FROM roles WHERE name = ?',
-          [role]
-        );
+        const roleRecord = await db.findOne<RowDataPacket>('SELECT id FROM roles WHERE name = ?', [role]);
 
         if (!roleRecord) {
           res.status(400).json({
             error: 'Validation Error',
-            message: 'Role not found'
+            message: 'Role not found',
           });
           return;
         }
@@ -224,7 +213,7 @@ export class AdminController {
         if (!validStatuses.includes(status)) {
           res.status(400).json({
             error: 'Validation Error',
-            message: 'Invalid status. Must be one of: active, inactive, locked'
+            message: 'Invalid status. Must be one of: active, inactive, locked',
           });
           return;
         }
@@ -242,7 +231,7 @@ export class AdminController {
       if (updates.length === 0) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'No valid fields to update'
+          message: 'No valid fields to update',
         });
         return;
       }
@@ -251,10 +240,7 @@ export class AdminController {
       updates.push('updated_at = CURRENT_TIMESTAMP');
       params.push(userId);
 
-      await db.execute(
-        `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
-        params
-      );
+      await db.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
 
       // 업데이트된 사용자 정보 조회
       const updatedUser = await db.findOne<RowDataPacket>(
@@ -270,19 +256,18 @@ export class AdminController {
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
         WHERE u.id = ?`,
-        [userId]
+        [userId],
       );
 
       res.json({
         message: 'User updated successfully',
-        user: updatedUser
+        user: updatedUser,
       });
-
     } catch (error: any) {
       console.error('Update user error:', error);
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Failed to update user'
+        message: 'Failed to update user',
       });
     }
   }
@@ -295,7 +280,7 @@ export class AdminController {
       if (isNaN(userId)) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Invalid user ID'
+          message: 'Invalid user ID',
         });
         return;
       }
@@ -304,46 +289,41 @@ export class AdminController {
       if (req.user && req.user.id === userId) {
         res.status(400).json({
           error: 'Bad Request',
-          message: 'Cannot deactivate your own account'
+          message: 'Cannot deactivate your own account',
         });
         return;
       }
 
       // 사용자 존재 확인
-      const existingUser = await db.findOne<RowDataPacket>(
-        'SELECT id, email, status FROM users WHERE id = ?',
-        [userId]
-      );
+      const existingUser = await db.findOne<RowDataPacket>('SELECT id, email, status FROM users WHERE id = ?', [
+        userId,
+      ]);
 
       if (!existingUser) {
         res.status(404).json({
           error: 'Not Found',
-          message: 'User not found'
+          message: 'User not found',
         });
         return;
       }
 
       // 계정 비활성화
-      await db.execute(
-        'UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        ['inactive', userId]
-      );
+      await db.execute('UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+        'inactive',
+        userId,
+      ]);
 
       // 해당 사용자의 모든 리프레시 토큰 무효화
-      await db.execute(
-        'UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ?',
-        [userId]
-      );
+      await db.execute('UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ?', [userId]);
 
       res.json({
-        message: 'User deactivated successfully'
+        message: 'User deactivated successfully',
       });
-
     } catch (error: any) {
       console.error('Deactivate user error:', error);
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Failed to deactivate user'
+        message: 'Failed to deactivate user',
       });
     }
   }
@@ -360,7 +340,7 @@ export class AdminController {
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
         GROUP BY r.name, u.status
-        ORDER BY r.name, u.status`
+        ORDER BY r.name, u.status`,
       );
 
       // 공고 통계
@@ -370,7 +350,7 @@ export class AdminController {
           COUNT(*) as count,
           AVG(budget) as avg_budget
         FROM tender_notices
-        GROUP BY status`
+        GROUP BY status`,
       );
 
       // 입찰 통계
@@ -379,7 +359,7 @@ export class AdminController {
           status,
           COUNT(*) as count
         FROM bids
-        GROUP BY status`
+        GROUP BY status`,
       );
 
       // 최근 활동 통계 (최근 30일)
@@ -391,7 +371,7 @@ export class AdminController {
         WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
         GROUP BY DATE(created_at)
         ORDER BY date DESC
-        LIMIT 30`
+        LIMIT 30`,
       );
 
       res.json({
@@ -399,16 +379,15 @@ export class AdminController {
           users: userStats,
           tenderNotices: tenderStats,
           bids: bidStats,
-          recentActivity
+          recentActivity,
         },
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       });
-
     } catch (error: any) {
       console.error('Get statistics error:', error);
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Failed to retrieve statistics'
+        message: 'Failed to retrieve statistics',
       });
     }
   }

@@ -72,7 +72,7 @@ export class ProposalDraftRepository {
 
   async findGeneratedProposals(): Promise<ProposalDraft[]> {
     return this.repository.find({
-      where: { 
+      where: {
         status: 'approved',
         // generated_at이 null이 아닌 경우
       },
@@ -155,7 +155,7 @@ export class ProposalDraftRepository {
     const review = await this.repository.count({ where: { status: 'review' } });
     const approved = await this.repository.count({ where: { status: 'approved' } });
     const rejected = await this.repository.count({ where: { status: 'rejected' } });
-    
+
     // 생성된 제안서 (HWP 파일이 있는 경우)
     const generated = await this.repository
       .createQueryBuilder('proposal')
@@ -186,14 +186,17 @@ export class ProposalDraftRepository {
       .getMany();
   }
 
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     proposals: ProposalDraft[];
     total: number;
     totalPages: number;
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [proposals, total] = await this.repository.findAndCount({
       relations: ['analysis_result', 'analysis_result.announcement'],
       skip,
@@ -212,7 +215,7 @@ export class ProposalDraftRepository {
   async findByStatusWithPagination(
     status: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<{
     proposals: ProposalDraft[];
     total: number;
@@ -220,7 +223,7 @@ export class ProposalDraftRepository {
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [proposals, total] = await this.repository.findAndCount({
       where: { status },
       relations: ['analysis_result', 'analysis_result.announcement'],

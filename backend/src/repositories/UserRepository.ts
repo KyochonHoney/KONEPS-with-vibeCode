@@ -62,7 +62,7 @@ export class UserRepository {
     if (user) {
       const attempts = user.login_attempts + 1;
       const lockTime = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
-      
+
       await this.repository.update(id, {
         login_attempts: attempts,
         locked_until: lockTime,
@@ -79,14 +79,17 @@ export class UserRepository {
     return this.repository.count();
   }
 
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     users: User[];
     total: number;
     totalPages: number;
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [users, total] = await this.repository.findAndCount({
       skip,
       take: limit,

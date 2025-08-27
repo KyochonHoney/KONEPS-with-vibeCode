@@ -104,14 +104,17 @@ export class AnnouncementRepository {
     return this.repository.count();
   }
 
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     announcements: Announcement[];
     total: number;
     totalPages: number;
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [announcements, total] = await this.repository.findAndCount({
       relations: ['files', 'analysis_results'],
       skip,

@@ -122,7 +122,7 @@ export class AnalysisResultRepository {
       .select('AVG(analysis.complexity_score)', 'avgComplexity')
       .where('analysis.complexity_score IS NOT NULL')
       .getRawOne();
-    
+
     return parseFloat(result?.avgComplexity || '0');
   }
 
@@ -132,7 +132,7 @@ export class AnalysisResultRepository {
       .select('AVG(analysis.feasibility_score)', 'avgFeasibility')
       .where('analysis.feasibility_score IS NOT NULL')
       .getRawOne();
-    
+
     return parseFloat(result?.avgFeasibility || '0');
   }
 
@@ -177,14 +177,17 @@ export class AnalysisResultRepository {
       .getMany();
   }
 
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     analysis_results: AnalysisResult[];
     total: number;
     totalPages: number;
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [analysis_results, total] = await this.repository.findAndCount({
       relations: ['announcement', 'proposal_drafts'],
       skip,

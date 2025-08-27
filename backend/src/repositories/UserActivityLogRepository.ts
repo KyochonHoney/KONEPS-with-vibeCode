@@ -116,7 +116,7 @@ export class UserActivityLogRepository {
     file_downloads: number;
   }> {
     const total_logs = await this.repository.count();
-    
+
     const unique_users_result = await this.repository
       .createQueryBuilder('log')
       .select('COUNT(DISTINCT log.user_id)', 'count')
@@ -207,7 +207,7 @@ export class UserActivityLogRepository {
     metadata?: object,
     ipAddress?: string,
     userAgent?: string,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<UserActivityLog> {
     return this.create({
       user_id: userId,
@@ -234,14 +234,17 @@ export class UserActivityLogRepository {
     return result.affected || 0;
   }
 
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     logs: UserActivityLog[];
     total: number;
     totalPages: number;
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [logs, total] = await this.repository.findAndCount({
       skip,
       take: limit,

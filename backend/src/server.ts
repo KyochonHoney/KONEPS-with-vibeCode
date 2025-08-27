@@ -13,6 +13,7 @@ import adminRoutes from './routes/admin';
 import announcementRoutes from './routes/announcements';
 import filesRoutes from './routes/files';
 import analysisRoutes from './routes/analysis';
+import narajangterRoutes from './routes/narajangter';
 
 // 환경 변수 로드
 dotenv.config();
@@ -43,12 +44,13 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/files', filesRoutes);
 app.use('/api/analysis', analysisRoutes);
+app.use('/api/narajangter', narajangterRoutes);
 
 // 헬스체크 엔드포인트
 app.get('/healthz', async (req, res) => {
   try {
     const dbHealthy = await testConnection();
-    
+
     if (dbHealthy) {
       res.status(200).json({
         status: 'healthy',
@@ -89,6 +91,7 @@ app.get('/', (req, res) => {
       announcements: '/api/announcements/*',
       files: '/api/files/*',
       analysis: '/api/analysis/*',
+      narajangter: '/api/narajangter/*',
     },
   });
 });
@@ -103,9 +106,9 @@ app.use('*', (req, res) => {
 });
 
 // 글로벌 에러 핸들러
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Global error handler:', error);
-  
+
   // 에러 타입별 처리
   if (error.name === 'ValidationError') {
     return res.status(400).json({
@@ -163,7 +166,6 @@ async function startServer() {
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs (coming soon)`);
       console.log('\n✨ Server is ready to accept connections!\n');
     });
-
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
@@ -188,7 +190,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // 처리되지 않은 예외 처리
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('Uncaught Exception:', error);
   process.exit(1);
 });

@@ -34,7 +34,10 @@
       "Bash(npm run migration:create:*)",
       "Bash(npm run migration:run:*)",
       "Bash(npm run migration:show:*)",
-      "Bash(npm run seed:sample:*)"
+      "Bash(npm run seed:sample:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": [],
     "ask": []

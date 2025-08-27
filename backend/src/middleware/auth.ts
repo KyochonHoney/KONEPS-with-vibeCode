@@ -2,19 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 import { JWTUtil } from '../utils/jwt';
 
 // JWT 토큰 검증 미들웨어
-export const authenticateToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      res.status(401).json({ 
+      res.status(401).json({
         error: 'Access token required',
-        message: 'Authorization header with Bearer token is required'
+        message: 'Authorization header with Bearer token is required',
       });
       return;
     }
@@ -28,31 +24,27 @@ export const authenticateToken = async (
 
     next();
   } catch (error) {
-    res.status(403).json({ 
+    res.status(403).json({
       error: 'Invalid or expired token',
-      message: 'The provided token is invalid or has expired'
+      message: 'The provided token is invalid or has expired',
     });
   }
 };
 
 // 슈퍼관리자 권한 확인 미들웨어
-export const requireSuperAdmin = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+export const requireSuperAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    res.status(401).json({ 
+    res.status(401).json({
       error: 'Authentication required',
-      message: 'Please log in to access this resource'
+      message: 'Please log in to access this resource',
     });
     return;
   }
 
   if (req.user.role !== 'superadmin') {
-    res.status(403).json({ 
+    res.status(403).json({
       error: 'Superadmin access required',
-      message: 'This resource requires superadmin privileges'
+      message: 'This resource requires superadmin privileges',
     });
     return;
   }
@@ -64,19 +56,19 @@ export const requireSuperAdmin = (
 export const requireRole = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({ 
+      res.status(401).json({
         error: 'Authentication required',
-        message: 'Please log in to access this resource'
+        message: 'Please log in to access this resource',
       });
       return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      res.status(403).json({ 
-        error: `Access denied`,
+      res.status(403).json({
+        error: 'Access denied',
         message: `This resource requires one of the following roles: ${allowedRoles.join(', ')}`,
         userRole: req.user.role,
-        requiredRoles: allowedRoles
+        requiredRoles: allowedRoles,
       });
       return;
     }
@@ -86,15 +78,11 @@ export const requireRole = (allowedRoles: string[]) => {
 };
 
 // 본인 확인 또는 관리자 권한 확인 미들웨어
-export const requireSelfOrAdmin = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+export const requireSelfOrAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    res.status(401).json({ 
+    res.status(401).json({
       error: 'Authentication required',
-      message: 'Please log in to access this resource'
+      message: 'Please log in to access this resource',
     });
     return;
   }
@@ -104,9 +92,9 @@ export const requireSelfOrAdmin = (
   const isAdmin = req.user.role === 'superadmin';
 
   if (!isOwner && !isAdmin) {
-    res.status(403).json({ 
+    res.status(403).json({
       error: 'Access denied',
-      message: 'You can only access your own resources or must have admin privileges'
+      message: 'You can only access your own resources or must have admin privileges',
     });
     return;
   }
@@ -115,11 +103,7 @@ export const requireSelfOrAdmin = (
 };
 
 // 선택적 인증 미들웨어 (토큰이 있으면 검증, 없어도 통과)
-export const optionalAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const optionalAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];

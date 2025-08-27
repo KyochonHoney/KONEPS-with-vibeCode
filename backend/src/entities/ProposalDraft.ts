@@ -53,7 +53,7 @@ export class ProposalDraft {
   @Column({ type: 'datetime', nullable: true })
   generated_at?: Date; // 생성 완료 시간
 
-  @ManyToOne(() => AnalysisResult, (analysis) => analysis.proposal_drafts, {
+  @ManyToOne(() => AnalysisResult, analysis => analysis.proposal_drafts, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'analysis_result_id' })

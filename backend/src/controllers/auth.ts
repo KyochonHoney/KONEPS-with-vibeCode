@@ -15,8 +15,8 @@ export class AuthController {
           message: 'Email and password are required',
           details: {
             email: !email ? 'Email is required' : null,
-            password: !password ? 'Password is required' : null
-          }
+            password: !password ? 'Password is required' : null,
+          },
         });
         return;
       }
@@ -26,7 +26,7 @@ export class AuthController {
       if (!emailRegex.test(email)) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Invalid email format'
+          message: 'Invalid email format',
         });
         return;
       }
@@ -35,7 +35,7 @@ export class AuthController {
       if (password.length < 8) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Password must be at least 8 characters long'
+          message: 'Password must be at least 8 characters long',
         });
         return;
       }
@@ -44,23 +44,22 @@ export class AuthController {
 
       res.status(201).json({
         message: 'User registered successfully',
-        user: result
+        user: result,
       });
-
     } catch (error: any) {
       console.error('Registration error:', error);
-      
+
       if (error.message === 'Email already exists') {
         res.status(409).json({
           error: 'Conflict',
-          message: 'Email already exists'
+          message: 'Email already exists',
         });
         return;
       }
 
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Registration failed'
+        message: 'Registration failed',
       });
     }
   }
@@ -74,7 +73,7 @@ export class AuthController {
       if (!email || !password) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Email and password are required'
+          message: 'Email and password are required',
         });
         return;
       }
@@ -83,37 +82,32 @@ export class AuthController {
       const ipAddress = req.ip || req.connection.remoteAddress || '';
       const userAgent = req.get('User-Agent') || '';
 
-      const result = await AuthService.login(
-        { email, password },
-        ipAddress,
-        userAgent
-      );
+      const result = await AuthService.login({ email, password }, ipAddress, userAgent);
 
       res.json({
         message: 'Login successful',
-        ...result
+        ...result,
       });
-
     } catch (error: any) {
       console.error('Login error:', error);
-      
+
       const errorMessages = [
         'Invalid email or password',
         'Account is temporarily locked. Try again later.',
-        'Account is inactive'
+        'Account is inactive',
       ];
 
       if (errorMessages.includes(error.message)) {
         res.status(401).json({
           error: 'Authentication Failed',
-          message: error.message
+          message: error.message,
         });
         return;
       }
 
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Login failed'
+        message: 'Login failed',
       });
     }
   }
@@ -126,7 +120,7 @@ export class AuthController {
       if (!refreshToken) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Refresh token is required'
+          message: 'Refresh token is required',
         });
         return;
       }
@@ -135,24 +129,25 @@ export class AuthController {
 
       res.json({
         message: 'Tokens refreshed successfully',
-        ...result
+        ...result,
       });
-
     } catch (error: any) {
       console.error('Token refresh error:', error);
-      
-      if (error.message.includes('Invalid or expired refresh token') || 
-          error.message.includes('User account is not active')) {
+
+      if (
+        error.message.includes('Invalid or expired refresh token') ||
+        error.message.includes('User account is not active')
+      ) {
         res.status(401).json({
           error: 'Authentication Failed',
-          message: error.message
+          message: error.message,
         });
         return;
       }
 
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Token refresh failed'
+        message: 'Token refresh failed',
       });
     }
   }
@@ -165,7 +160,7 @@ export class AuthController {
       if (!refreshToken) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Refresh token is required'
+          message: 'Refresh token is required',
         });
         return;
       }
@@ -173,15 +168,14 @@ export class AuthController {
       await AuthService.logout(refreshToken);
 
       res.json({
-        message: 'Logout successful'
+        message: 'Logout successful',
       });
-
     } catch (error: any) {
       console.error('Logout error:', error);
-      
+
       // 로그아웃은 토큰이 유효하지 않아도 성공으로 처리
       res.json({
-        message: 'Logout successful'
+        message: 'Logout successful',
       });
     }
   }
@@ -194,25 +188,24 @@ export class AuthController {
       if (!email) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Email is required'
+          message: 'Email is required',
         });
         return;
       }
 
       // TODO: 이메일 전송 기능 구현
       // 실제 구현에서는 이메일로 재설정 링크를 보내야 함
-      
+
       // 보안상 이메일 존재 여부와 관계없이 동일한 응답 반환
       res.json({
-        message: 'If the email exists, a password reset link has been sent'
+        message: 'If the email exists, a password reset link has been sent',
       });
-
     } catch (error: any) {
       console.error('Forgot password error:', error);
-      
+
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Password reset request failed'
+        message: 'Password reset request failed',
       });
     }
   }
@@ -225,7 +218,7 @@ export class AuthController {
       if (!token || !newPassword) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Token and new password are required'
+          message: 'Token and new password are required',
         });
         return;
       }
@@ -234,23 +227,22 @@ export class AuthController {
       if (newPassword.length < 8) {
         res.status(400).json({
           error: 'Validation Error',
-          message: 'Password must be at least 8 characters long'
+          message: 'Password must be at least 8 characters long',
         });
         return;
       }
 
       // TODO: 비밀번호 재설정 토큰 검증 및 비밀번호 업데이트 구현
-      
-      res.json({
-        message: 'Password reset successful'
-      });
 
+      res.json({
+        message: 'Password reset successful',
+      });
     } catch (error: any) {
       console.error('Reset password error:', error);
-      
+
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Password reset failed'
+        message: 'Password reset failed',
       });
     }
   }
@@ -261,21 +253,20 @@ export class AuthController {
       if (!req.user) {
         res.status(401).json({
           error: 'Authentication Required',
-          message: 'Please log in to access this resource'
+          message: 'Please log in to access this resource',
         });
         return;
       }
 
       res.json({
-        user: req.user
+        user: req.user,
       });
-
     } catch (error: any) {
       console.error('Get current user error:', error);
-      
+
       res.status(500).json({
         error: 'Internal Server Error',
-        message: 'Failed to get user information'
+        message: 'Failed to get user information',
       });
     }
   }

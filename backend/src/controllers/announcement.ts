@@ -32,7 +32,7 @@ export const getAnnouncementById = async (req: Request, res: Response, next: Nex
     if (!announcement) {
       return res.status(404).json({
         error: 'Announcement not found',
-        message: `Announcement with id ${id} does not exist`
+        message: `Announcement with id ${id} does not exist`,
       });
     }
 
@@ -51,7 +51,7 @@ export const getAnnouncementByBidNumber = async (req: Request, res: Response, ne
     if (!announcement) {
       return res.status(404).json({
         error: 'Announcement not found',
-        message: `Announcement with bid number ${bidNumber} does not exist`
+        message: `Announcement with bid number ${bidNumber} does not exist`,
       });
     }
 
@@ -74,14 +74,14 @@ export const createAnnouncement = async (req: Request, res: Response, next: Next
       application_deadline,
       status = 'active',
       requirements,
-      original_url
+      original_url,
     } = req.body;
 
     // 기본 유효성 검사
     if (!bid_number || !title || !description || !contracting_agency || !budget_amount) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'bid_number, title, description, contracting_agency, and budget_amount are required'
+        message: 'bid_number, title, description, contracting_agency, and budget_amount are required',
       });
     }
 
@@ -95,7 +95,7 @@ export const createAnnouncement = async (req: Request, res: Response, next: Next
       application_deadline: new Date(application_deadline),
       status,
       requirements,
-      original_url
+      original_url,
     });
 
     res.status(201).json(announcement);
@@ -103,7 +103,7 @@ export const createAnnouncement = async (req: Request, res: Response, next: Next
     if ((error as Error).message.includes('Duplicate entry')) {
       return res.status(409).json({
         error: 'Duplicate bid number',
-        message: 'An announcement with this bid number already exists'
+        message: 'An announcement with this bid number already exists',
       });
     }
     next(error);
@@ -132,7 +132,7 @@ export const updateAnnouncement = async (req: Request, res: Response, next: Next
     if (!announcement) {
       return res.status(404).json({
         error: 'Announcement not found',
-        message: `Announcement with id ${id} does not exist`
+        message: `Announcement with id ${id} does not exist`,
       });
     }
 
@@ -151,7 +151,7 @@ export const deleteAnnouncement = async (req: Request, res: Response, next: Next
     if (!success) {
       return res.status(404).json({
         error: 'Announcement not found',
-        message: `Announcement with id ${id} does not exist`
+        message: `Announcement with id ${id} does not exist`,
       });
     }
 
@@ -186,11 +186,11 @@ export const getAnnouncementsByStatus = async (req: Request, res: Response, next
 export const searchAnnouncements = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { q: searchTerm } = req.query;
-    
+
     if (!searchTerm || typeof searchTerm !== 'string') {
       return res.status(400).json({
         error: 'Missing search term',
-        message: 'Please provide a search term using the "q" query parameter'
+        message: 'Please provide a search term using the "q" query parameter',
       });
     }
 

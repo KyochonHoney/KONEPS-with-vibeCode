@@ -79,9 +79,9 @@ export class AnnouncementFileRepository {
 
   async findPendingAnalysis(): Promise<AnnouncementFile[]> {
     return this.repository.find({
-      where: { 
+      where: {
         is_downloaded: true,
-        is_analyzed: false 
+        is_analyzed: false,
       },
       relations: ['announcement'],
       order: { created_at: 'ASC' },
@@ -116,7 +116,7 @@ export class AnnouncementFileRepository {
       .createQueryBuilder('file')
       .select('SUM(file.file_size)', 'totalSize')
       .getRawOne();
-    
+
     return parseInt(result?.totalSize || '0');
   }
 
@@ -132,8 +132,8 @@ export class AnnouncementFileRepository {
     const downloaded = await this.repository.count({ where: { is_downloaded: true } });
     const analyzed = await this.repository.count({ where: { is_analyzed: true } });
     const pending_download = await this.repository.count({ where: { is_downloaded: false } });
-    const pending_analysis = await this.repository.count({ 
-      where: { is_downloaded: true, is_analyzed: false } 
+    const pending_analysis = await this.repository.count({
+      where: { is_downloaded: true, is_analyzed: false },
     });
     const total_size = await this.getTotalFileSize();
 
@@ -147,14 +147,17 @@ export class AnnouncementFileRepository {
     };
   }
 
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     files: AnnouncementFile[];
     total: number;
     totalPages: number;
     currentPage: number;
   }> {
     const skip = (page - 1) * limit;
-    
+
     const [files, total] = await this.repository.findAndCount({
       relations: ['announcement'],
       skip,

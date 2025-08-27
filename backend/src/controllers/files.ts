@@ -30,7 +30,7 @@ export const getFileById = async (req: Request, res: Response, next: NextFunctio
     if (!file) {
       return res.status(404).json({
         error: 'File not found',
-        message: `File with id ${id} does not exist`
+        message: `File with id ${id} does not exist`,
       });
     }
 
@@ -62,13 +62,14 @@ export const createFile = async (req: Request, res: Response, next: NextFunction
       file_size,
       file_type,
       file_hash,
-      download_url
+      download_url,
     } = req.body;
 
     if (!announcement_id || !original_filename || !stored_filename || !file_path || !file_size || !file_type) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'announcement_id, original_filename, stored_filename, file_path, file_size, and file_type are required'
+        message:
+          'announcement_id, original_filename, stored_filename, file_path, file_size, and file_type are required',
       });
     }
 
@@ -80,7 +81,7 @@ export const createFile = async (req: Request, res: Response, next: NextFunction
       file_size: parseInt(file_size),
       file_type,
       file_hash,
-      download_url
+      download_url,
     });
 
     res.status(201).json(file);
@@ -107,7 +108,7 @@ export const updateFile = async (req: Request, res: Response, next: NextFunction
     if (!file) {
       return res.status(404).json({
         error: 'File not found',
-        message: `File with id ${id} does not exist`
+        message: `File with id ${id} does not exist`,
       });
     }
 
@@ -126,7 +127,7 @@ export const deleteFile = async (req: Request, res: Response, next: NextFunction
     if (!success) {
       return res.status(404).json({
         error: 'File not found',
-        message: `File with id ${id} does not exist`
+        message: `File with id ${id} does not exist`,
       });
     }
 
@@ -196,7 +197,7 @@ export const markFileAsDownloaded = async (req: Request, res: Response, next: Ne
     if (!success) {
       return res.status(404).json({
         error: 'File not found',
-        message: `File with id ${id} does not exist`
+        message: `File with id ${id} does not exist`,
       });
     }
 
@@ -215,7 +216,7 @@ export const markFileAsAnalyzed = async (req: Request, res: Response, next: Next
     if (!success) {
       return res.status(404).json({
         error: 'File not found',
-        message: `File with id ${id} does not exist`
+        message: `File with id ${id} does not exist`,
       });
     }
 
@@ -244,7 +245,7 @@ export const processFileDownload = async (req: Request, res: Response, next: Nex
     if (!success) {
       return res.status(400).json({
         error: 'Download failed',
-        message: 'File not found or already downloaded'
+        message: 'File not found or already downloaded',
       });
     }
 
@@ -263,7 +264,7 @@ export const processFileAnalysis = async (req: Request, res: Response, next: Nex
     if (!success) {
       return res.status(400).json({
         error: 'Analysis failed',
-        message: 'File not found, not downloaded, or already analyzed'
+        message: 'File not found, not downloaded, or already analyzed',
       });
     }
 

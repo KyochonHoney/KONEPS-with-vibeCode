@@ -2,10 +2,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { promisify } from 'util';
 
 const signAsync = promisify(jwt.sign);
-const verifyAsync = promisify(jwt.verify) as (
-  token: string,
-  secret: string
-) => Promise<JwtPayload>;
+const verifyAsync = promisify(jwt.verify) as (token: string, secret: string) => Promise<JwtPayload>;
 
 export interface TokenPayload {
   id: number;
@@ -28,7 +25,7 @@ export class JWTUtil {
       email: payload.email,
       role: payload.role,
     };
-    
+
     return signAsync(tokenPayload, this.accessSecret, {
       expiresIn: this.accessExpiresIn,
     }) as Promise<string>;
@@ -41,7 +38,7 @@ export class JWTUtil {
       email: payload.email,
       role: payload.role,
     };
-    
+
     return signAsync(tokenPayload, this.refreshSecret, {
       expiresIn: this.refreshExpiresIn,
     }) as Promise<string>;
@@ -80,14 +77,14 @@ export class JWTUtil {
   static getTokenExpiration(expiresIn: string): Date {
     const now = new Date();
     const match = expiresIn.match(/^(\d+)([smhd])$/);
-    
+
     if (!match) {
       throw new Error('Invalid expires in format');
     }
-    
+
     const value = parseInt(match[1]);
     const unit = match[2];
-    
+
     switch (unit) {
       case 's':
         return new Date(now.getTime() + value * 1000);

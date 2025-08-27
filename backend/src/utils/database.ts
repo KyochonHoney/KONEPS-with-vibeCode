@@ -17,10 +17,7 @@ export class Database {
   }
 
   // SELECT 쿼리 실행
-  async query<T extends RowDataPacket[]>(
-    sql: string,
-    params: any[] = []
-  ): Promise<T> {
+  async query<T extends RowDataPacket[]>(sql: string, params: any[] = []): Promise<T> {
     const [rows] = await this.pool.execute<T>(sql, params);
     return rows;
   }
@@ -32,9 +29,7 @@ export class Database {
   }
 
   // 트랜잭션 실행
-  async transaction<T>(
-    callback: (connection: any) => Promise<T>
-  ): Promise<T> {
+  async transaction<T>(callback: (connection: any) => Promise<T>): Promise<T> {
     const connection = await this.pool.getConnection();
     try {
       await connection.beginTransaction();
@@ -50,10 +45,7 @@ export class Database {
   }
 
   // 단일 레코드 조회
-  async findOne<T extends RowDataPacket>(
-    sql: string,
-    params: any[] = []
-  ): Promise<T | null> {
+  async findOne<T extends RowDataPacket>(sql: string, params: any[] = []): Promise<T | null> {
     const rows = await this.query<T[]>(sql, params);
     return rows.length > 0 ? rows[0] : null;
   }
